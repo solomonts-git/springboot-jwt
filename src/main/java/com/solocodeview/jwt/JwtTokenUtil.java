@@ -16,6 +16,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 @Component
@@ -25,12 +26,13 @@ public class JwtTokenUtil {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenUtil.class);
 	
-	@Value("${app.jwt.secret")
+	@Value("${app.jwt.secret}")
 	private String SECRET_KEY;
 	
 	public String generateAccessToken(User user) {
+		byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
 
-	    Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+	    Key key = Keys.hmacShaKeyFor(keyBytes);
 
 	    return Jwts.builder()
 	            .subject(user.getId() + "," + user.getEmail())
@@ -45,7 +47,11 @@ public class JwtTokenUtil {
 	
 	public boolean validateAccessToken(String token) {
 	    try {
-	        SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+	    	byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+
+		   // Key key = Keys.hmacShaKeyFor(keyBytes));
+
+	        SecretKey key = Keys.hmacShaKeyFor(keyBytes);
 
 	        Jwts.parser()
 	                .verifyWith(key)                 
@@ -72,7 +78,9 @@ public class JwtTokenUtil {
 	} 
 	
 	private Claims parseClaims(String token) {
-		  SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+		byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+
+		  SecretKey key = Keys.hmacShaKeyFor(keyBytes);
 
 		return Jwts.parser()
 				 .verifyWith(key)
@@ -81,7 +89,4 @@ public class JwtTokenUtil {
 				 .getPayload();
 	}
 	
-	
-
-
 }

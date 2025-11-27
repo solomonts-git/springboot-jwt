@@ -1,9 +1,11 @@
 package com.solocodeview.jwt;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -59,12 +61,12 @@ public class JwtTokenFilter extends OncePerRequestFilter{
 		return token;
 	}
 	
-	private void setAuthenticationContext(String token, HttpServletRequest requeest) {
+	private void setAuthenticationContext(String token, HttpServletRequest request) {
 		UserDetails userDetails = getUserDetails(token);
 		
-		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, null);
+		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
 		authentication.setDetails(
-				new WebAuthenticationDetailsSource().buildDetails(requeest)
+				new WebAuthenticationDetailsSource().buildDetails(request)
 				);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
